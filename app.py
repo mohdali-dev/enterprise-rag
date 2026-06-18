@@ -10,436 +10,703 @@ from src.rag_chain import RAGChain
 
 load_dotenv()
 
-# Page config
+# ---------------------------------------------------
+# Page Config
+# ---------------------------------------------------
 st.set_page_config(
-    page_title="DocuMind AI",
-    page_icon="🧠",
+    page_title="InsightDocs AI",
+    page_icon="📊",
     layout="wide",
-    initial_sidebar_state="expanded",
-    menu_items={"About": "DocuMind AI - Intelligent Document Analysis"}
+    initial_sidebar_state="expanded"
 )
 
-# Custom CSS
+# ---------------------------------------------------
+# Professional CSS (Production Grade)
+# ---------------------------------------------------
 st.markdown("""
 <style>
-    /* Main theme colors */
-    :root {
-        --primary: #667eea;
-        --secondary: #764ba2;
-        --success: #10b981;
-        --danger: #ef4444;
-        --warning: #f59e0b;
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    * {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
     
-    /* Dark mode support */
-    @media (prefers-color-scheme: dark) {
-        :root {
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --text-primary: #f1f5f9;
-            --text-secondary: #cbd5e1;
-        }
+    /* Remove default padding */
+    .block-container {
+        padding-top: 3rem;
+        padding-bottom: 2rem;
+        max-width: 900px;
     }
     
-    @media (prefers-color-scheme: light) {
-        :root {
-            --bg-primary: #ffffff;
-            --bg-secondary: #f8fafc;
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
-        }
-    }
-    
-    /* Main container */
-    .main {
-        padding-top: 2rem;
-    }
-    
-    /* Header styling */
-    .header-container {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 3rem 2rem;
-        border-radius: 15px;
+    /* Brand Header */
+    .brand-header {
+        text-align: center;
+        padding: 2.5rem 0;
         margin-bottom: 2rem;
-        color: white;
-        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
     }
     
-    .header-title {
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin: 0;
+    .brand-logo {
+        font-size: 3rem;
         margin-bottom: 0.5rem;
     }
     
-    .header-subtitle {
-        font-size: 1.1rem;
-        opacity: 0.9;
+    .brand-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 0;
+        letter-spacing: -0.5px;
+    }
+    
+    .brand-subtitle {
+        color: #64748b;
+        font-size: 1rem;
+        margin-top: 0.5rem;
+        font-weight: 400;
+    }
+    
+    /* Sidebar Styling */
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+        border-right: 1px solid #e2e8f0;
+    }
+    
+    .sidebar-brand {
+        text-align: center;
+        padding: 2rem 1rem;
+        border-bottom: 2px solid #e2e8f0;
+        margin-bottom: 1.5rem;
+    }
+    
+    .sidebar-logo {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .sidebar-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
         margin: 0;
     }
     
-    /* Card styling */
-    .card {
-        background: var(--bg-secondary);
-        padding: 1.5rem;
-        border-radius: 12px;
-        border: 1px solid rgba(102, 126, 234, 0.1);
-        margin-bottom: 1rem;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        transition: all 0.3s ease;
+    .sidebar-tagline {
+        font-size: 0.8rem;
+        color: #64748b;
+        margin-top: 0.25rem;
     }
     
-    .card:hover {
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
-        transform: translateY(-2px);
-    }
-    
-    .card-title {
-        font-size: 1.2rem;
+    /* Section Headers */
+    .section-header {
+        font-size: 0.9rem;
         font-weight: 600;
-        margin-bottom: 0.75rem;
-        color: #667eea;
+        color: #334155;
+        margin: 1.5rem 0 0.75rem 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
     
-    /* Document list */
-    .doc-item {
-        background: var(--bg-primary);
-        padding: 1rem;
-        border-radius: 8px;
-        margin-bottom: 0.75rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-left: 4px solid #667eea;
+    /* Document Cards */
+    .doc-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 0.9rem;
+        margin-bottom: 0.6rem;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    
+    .doc-card:hover {
+        border-color: #667eea;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        transform: translateY(-1px);
     }
     
     .doc-name {
-        font-weight: 500;
-        color: var(--text-primary);
+        font-weight: 600;
+        color: #1e293b;
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
     }
     
-    .doc-info {
-        font-size: 0.85rem;
-        color: var(--text-secondary);
+    .doc-meta {
+        font-size: 0.75rem;
+        color: #94a3b8;
     }
     
-    /* Button styling */
+    /* Chat Messages */
+    .stChatMessage {
+        background: transparent !important;
+        padding: 1.25rem 1rem;
+    }
+    
+    .stChatMessage[data-testid*="user"] {
+        background: #f1f5f9 !important;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+    }
+    
+    .stChatMessage[data-testid*="assistant"] {
+        background: white !important;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+    }
+    
+    /* Buttons */
     .stButton > button {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         border: none;
         border-radius: 8px;
-        padding: 0.75rem 1.5rem;
+        padding: 0.6rem 1.25rem;
         font-weight: 600;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.25);
     }
     
     .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 4px 16px rgba(102, 126, 234, 0.35);
+        transform: translateY(-1px);
     }
     
-    /* Input styling */
-    .stTextInput > div > div > input,
-    .stTextArea > div > div > textarea {
-        border-radius: 8px;
-        border: 1px solid rgba(102, 126, 234, 0.2);
+    .stButton > button:active {
+        transform: translateY(0);
     }
     
-    /* Chat messages */
-    .stChatMessage {
-        background: var(--bg-secondary);
-        border-radius: 12px;
-        padding: 1rem;
-    }
-    
-    .stChatMessage[data-testid="ChatMessage"]:has(p:first-child:contains("user")) {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-    }
-    
-    /* Metrics */
-    .metric-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
+    /* File Uploader */
+    [data-testid="stFileUploader"] {
+        border: 2px dashed #cbd5e1;
+        border-radius: 10px;
         padding: 1.5rem;
-        border-radius: 12px;
-        text-align: center;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+        background: #f8fafc;
+        transition: all 0.2s ease;
     }
     
-    .metric-value {
+    [data-testid="stFileUploader"]:hover {
+        border-color: #667eea;
+        background: #f1f5f9;
+    }
+    
+    /* Welcome Cards */
+    .welcome-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 16px;
+        padding: 3rem 2rem;
+        text-align: center;
+        color: white;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+    }
+    
+    .welcome-title {
         font-size: 2rem;
         font-weight: 700;
-        margin: 0.5rem 0;
+        margin-bottom: 0.5rem;
     }
     
-    .metric-label {
+    .welcome-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.95;
+    }
+    
+    /* Feature Grid */
+    .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.25rem;
+        margin-top: 2rem;
+    }
+    
+    .feature-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1.75rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    
+    .feature-card:hover {
+        border-color: #667eea;
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+        transform: translateY(-4px);
+    }
+    
+    .feature-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .feature-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+    }
+    
+    .feature-desc {
         font-size: 0.9rem;
-        opacity: 0.9;
+        color: #64748b;
+        line-height: 1.5;
     }
     
-    /* Sidebar */
-    .sidebar .sidebar-content {
-        background: var(--bg-secondary);
-    }
-    
-    /* Tabs */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 2rem;
-    }
-    
-    .stTabs [data-baseweb="tab"] {
-        height: auto;
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px 8px 0 0;
-    }
-    
-    /* Success messages */
-    .stSuccess {
-        background: rgba(16, 185, 129, 0.1);
-        border-left: 4px solid #10b981;
-        border-radius: 8px;
-    }
-    
-    /* Expander */
-    .streamlit-expanderHeader {
-        background: rgba(102, 126, 234, 0.05);
-        border-radius: 8px;
-    }
-    
-    /* Source cards */
+    /* Source Cards */
     .source-card {
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%);
+        background: #f8fafc;
         border-left: 4px solid #667eea;
+        border-radius: 8px;
         padding: 1rem;
         margin: 0.75rem 0;
-        border-radius: 8px;
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
     }
     
     .source-card:hover {
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
+        background: #f1f5f9;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
     }
     
     .source-title {
         font-weight: 600;
-        color: #667eea;
+        color: #334155;
+        font-size: 0.9rem;
         margin-bottom: 0.5rem;
     }
     
     .source-content {
-        font-size: 0.9rem;
-        color: var(--text-secondary);
-        line-height: 1.5;
+        font-size: 0.85rem;
+        color: #64748b;
+        line-height: 1.6;
+        margin-bottom: 0.5rem;
     }
     
     .source-meta {
-        font-size: 0.8rem;
-        color: var(--text-secondary);
-        margin-top: 0.5rem;
+        font-size: 0.75rem;
+        color: #94a3b8;
         padding-top: 0.5rem;
-        border-top: 1px solid rgba(102, 126, 234, 0.1);
+        border-top: 1px solid #e2e8f0;
     }
     
-    /* Quick action buttons */
-    .quick-action-btn {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
+    /* Confidence Badge */
+    .confidence-badge {
+        display: inline-block;
+        padding: 0.35rem 0.9rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-top: 0.75rem;
+    }
+    
+    .confidence-high {
+        background: #d1fae5;
+        color: #065f46;
+    }
+    
+    .confidence-medium {
+        background: #fef3c7;
+        color: #92400e;
+    }
+    
+    .confidence-low {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+    
+    /* Stats */
+    .stat-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 1.25rem;
         text-align: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #667eea;
+        margin-bottom: 0.25rem;
+    }
+    
+    .stat-label {
+        font-size: 0.85rem;
+        color: #64748b;
+        font-weight: 500;
+    }
+    
+    /* Quick Actions */
+    .quick-actions {
+        margin-bottom: 2rem;
+    }
+    
+    /* Expander */
+    .streamlit-expanderHeader {
+        background: #f8fafc;
+        border-radius: 8px;
         font-weight: 600;
     }
     
-    .quick-action-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+    /* Chat Input */
+    .stChatInputContainer {
+        border-top: 1px solid #e2e8f0;
+        padding-top: 1rem;
+        margin-top: 1rem;
     }
     
-    /* Loading animation */
-    @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.5; }
-    }
-    
-    .loading {
-        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
+    /* Hide Streamlit branding */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
     
     /* Scrollbar */
     ::-webkit-scrollbar {
         width: 8px;
+        height: 8px;
     }
     
     ::-webkit-scrollbar-track {
-        background: transparent;
+        background: #f1f5f9;
     }
     
     ::-webkit-scrollbar-thumb {
-        background: #667eea;
+        background: #cbd5e1;
         border-radius: 4px;
     }
     
     ::-webkit-scrollbar-thumb:hover {
-        background: #764ba2;
+        background: #94a3b8;
+    }
+    
+    /* Spinner */
+    .stSpinner > div {
+        border-top-color: #667eea !important;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Initialize session state
-def init_session_state():
+# ---------------------------------------------------
+# Session State
+# ---------------------------------------------------
+def init_session():
     defaults = {
         "chat_history": [],
-        "documents_processed": [],
+        "documents": [],
         "vector_store": None,
         "rag_chain": None,
         "processor": None,
-        "query_count": 0,
-        "theme": "light"
+        "total_queries": 0,
+        "show_welcome": True
     }
-    for key, value in defaults.items():
-        if key not in st.session_state:
-            st.session_state[key] = value
+    for k, v in defaults.items():
+        if k not in st.session_state:
+            st.session_state[k] = v
 
-def initialize_components():
+
+def initialize():
     if st.session_state.vector_store is None:
-        st.session_state.vector_store = VectorStore()
-        st.session_state.rag_chain = RAGChain(st.session_state.vector_store)
-        st.session_state.processor = DocumentProcessor()
+        with st.spinner("🔄 Initializing AI systems..."):
+            st.session_state.vector_store = VectorStore()
+            st.session_state.processor = DocumentProcessor()
+            st.session_state.rag_chain = RAGChain(st.session_state.vector_store)
 
+
+# ---------------------------------------------------
+# Sidebar
+# ---------------------------------------------------
 def render_sidebar():
     with st.sidebar:
-        # Logo/Title
         st.markdown("""
-        <div style='text-align: center; margin-bottom: 2rem;'>
-            <h1 style='margin: 0; font-size: 2rem;'>🧠</h1>
-            <p style='margin: 0.5rem 0 0 0; font-weight: 600;'>DocuMind AI</p>
-            <p style='margin: 0; font-size: 0.85rem; opacity: 0.7;'>Document Intelligence</p>
+        <div class='sidebar-brand'>
+            <div class='sidebar-logo'>📊</div>
+            <div class='sidebar-title'>InsightDocs AI</div>
+            <div class='sidebar-tagline'>Enterprise Document Intelligence</div>
         </div>
         """, unsafe_allow_html=True)
         
-        st.markdown("---")
+        # Upload Section
+        st.markdown("<div class='section-header'>📤 Upload Documents</div>", unsafe_allow_html=True)
         
-        # Upload section
-        st.markdown("### 📁 Upload Documents")
-        
-        uploaded_files = st.file_uploader(
+        uploaded = st.file_uploader(
             "Choose files",
             type=["pdf", "docx", "txt", "csv"],
             accept_multiple_files=True,
             label_visibility="collapsed"
         )
         
-        if uploaded_files:
+        if uploaded:
+            if st.button("🚀 Process Documents", use_container_width=True, type="primary"):
+                process_docs(uploaded)
+        
+        # Documents List
+        if st.session_state.documents:
+            st.markdown(f"<div class='section-header'>📚 Documents ({len(st.session_state.documents)})</div>", unsafe_allow_html=True)
+            
+            for i, doc in enumerate(st.session_state.documents):
+                st.markdown(f"""
+                <div class='doc-card'>
+                    <div class='doc-name'>📄 {doc['name'][:22]}{'...' if len(doc['name']) > 22 else ''}</div>
+                    <div class='doc-meta'>{doc['chunks']} chunks • {doc['time']}</div>
+                </div>
+                """, unsafe_allow_html=True)
+        
+        # Stats
+        if st.session_state.documents:
+            st.markdown("<div class='section-header'>📊 Statistics</div>", unsafe_allow_html=True)
+            
+            total_chunks = sum(d['chunks'] for d in st.session_state.documents)
+            
             col1, col2 = st.columns(2)
             with col1:
-                if st.button("🚀 Process", use_container_width=True, key="process_btn"):
-                    process_documents(uploaded_files)
-            with col2:
-                st.write("")  # Spacer
-        
-        st.markdown("---")
-        
-        # Documents list
-        if st.session_state.documents_processed:
-            st.markdown("### 📚 Loaded Documents")
-            st.markdown(f"**Total:** {len(st.session_state.documents_processed)} files")
+                st.markdown(f"""
+                <div class='stat-card'>
+                    <div class='stat-value'>{st.session_state.total_queries}</div>
+                    <div class='stat-label'>Queries</div>
+                </div>
+                """, unsafe_allow_html=True)
             
-            for i, doc in enumerate(st.session_state.documents_processed):
-                col1, col2, col3 = st.columns([2, 1, 0.5])
-                with col1:
-                    st.markdown(f"📄 **{doc['name'][:18]}...**")
-                with col2:
-                    st.caption(f"{doc['chunks']} chunks")
-                with col3:
-                    if st.button("🗑️", key=f"del_{i}", help="Delete"):
-                        delete_document(doc['name'])
+            with col2:
+                st.markdown(f"""
+                <div class='stat-card'>
+                    <div class='stat-value'>{total_chunks}</div>
+                    <div class='stat-label'>Chunks</div>
+                </div>
+                """, unsafe_allow_html=True)
         
-        st.markdown("---")
-        
-        # Filter section
-        st.markdown("### 🔍 Filter")
-        filter_doc = st.selectbox(
-            "Document",
-            options=["All Documents"] + [d['name'] for d in st.session_state.documents_processed],
-            label_visibility="collapsed"
-        )
-        
-        st.markdown("---")
-        
-        # Actions section
-        st.markdown("### ⚙️ Settings")
+        # Actions
+        st.markdown("<div class='section-header'>⚙️ Actions</div>", unsafe_allow_html=True)
         
         col1, col2 = st.columns(2)
         with col1:
-            if st.button("🔄 Reset", use_container_width=True, key="reset_btn"):
+            if st.button("🔄 Reset All", use_container_width=True):
                 reset_app()
         with col2:
-            if st.button("📊 Stats", use_container_width=True, key="stats_btn"):
-                st.session_state.show_stats = True
+            if st.button("🗑️ Clear Chat", use_container_width=True):
+                st.session_state.chat_history = []
+                st.session_state.show_welcome = True
+                st.rerun()
         
-        st.markdown("---")
-        st.caption("Made with ❤️ using Groq & LangChain")
-        
-        return filter_doc
+        st.markdown("<br><br>", unsafe_allow_html=True)
+        st.caption("💡 Powered by Groq & LangChain")
 
-def process_documents(uploaded_files):
-    new_files = [
-        f for f in uploaded_files
-        if f.name not in [d['name'] for d in st.session_state.documents_processed]
-    ]
+
+# ---------------------------------------------------
+# Document Processing
+# ---------------------------------------------------
+def process_docs(files):
+    new_files = [f for f in files if f.name not in [d['name'] for d in st.session_state.documents]]
     
     if not new_files:
-        st.sidebar.warning("Documents already processed!")
+        st.warning("All files already processed!")
         return
     
-    progress_container = st.sidebar.container()
-    progress_bar = progress_container.progress(0)
-    status = progress_container.empty()
+    progress_bar = st.progress(0)
+    status_text = st.empty()
     
     for i, file in enumerate(new_files):
-        status.info(f"⏳ Processing {file.name}...")
+        status_text.info(f"⏳ Processing **{file.name}**...")
+        
         chunks = st.session_state.processor.process_file(file)
         
         if chunks:
-            success = st.session_state.vector_store.add_documents(chunks)
-            
-            if success:
-                st.session_state.documents_processed.append({
-                    "name": file.name,
-                    "chunks": len(chunks),
-                    "processed_at": datetime.now().strftime("%H:%M")
-                })
+            st.session_state.vector_store.add_documents(chunks)
+            st.session_state.documents.append({
+                "name": file.name,
+                "chunks": len(chunks),
+                "time": datetime.now().strftime("%H:%M")
+            })
         
         progress_bar.progress((i + 1) / len(new_files))
     
-    status.success("✅ All documents processed!")
+    status_text.success(f"✅ Successfully processed {len(new_files)} document(s)!")
+    st.session_state.show_welcome = False
     time.sleep(1.5)
-    progress_container.empty()
     st.rerun()
 
-def delete_document(doc_name: str):
-    st.session_state.vector_store.delete_document(doc_name)
-    st.session_state.documents_processed = [
-        d for d in st.session_state.documents_processed
-        if d['name'] != doc_name
-    ]
-    st.rerun()
 
 def reset_app():
     if st.session_state.vector_store:
         st.session_state.vector_store.reset()
     st.session_state.chat_history = []
-    st.session_state.documents_processed = []
-    st.session_state.query_count = 0
+    st.session_state.documents = []
+    st.session_state.total_queries = 0
+    st.session_state.show_welcome = True
     st.rerun()
 
-def render_sources(sources: list):
-    with st.expander("📚 Sources & References"):
+
+# ---------------------------------------------------
+# Welcome Screen
+# ---------------------------------------------------
+def render_welcome():
+    st.markdown("""
+    <div class='welcome-container'>
+        <div class='welcome-title'>Welcome to InsightDocs AI</div>
+        <div class='welcome-subtitle'>Transform your documents into intelligent conversations</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div class='feature-grid'>
+        <div class='feature-card'>
+            <div class='feature-icon'>📤</div>
+            <div class='feature-title'>Upload Documents</div>
+            <div class='feature-desc'>Support for PDF, DOCX, TXT, and CSV files</div>
+        </div>
+        <div class='feature-card'>
+            <div class='feature-icon'>🔍</div>
+            <div class='feature-title'>Smart Search</div>
+            <div class='feature-desc'>AI-powered semantic search across all documents</div>
+        </div>
+        <div class='feature-card'>
+            <div class='feature-icon'>💬</div>
+            <div class='feature-title'>Chat Interface</div>
+            <div class='feature-desc'>Natural conversation with source citations</div>
+        </div>
+        <div class='feature-card'>
+            <div class='feature-icon'>💡</div>
+            <div class='feature-title'>Extract Insights</div>
+            <div class='feature-desc'>Generate summaries and key findings</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+# ---------------------------------------------------
+# Chat Interface
+# ---------------------------------------------------
+def render_chat():
+    st.markdown("""
+    <div class='brand-header'>
+        <div class='brand-logo'>📊</div>
+        <div class='brand-title'>InsightDocs AI</div>
+        <div class='brand-subtitle'>Ask intelligent questions about your documents</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Quick Actions
+    if st.session_state.documents and not st.session_state.show_welcome:
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            if st.button("📋 Summarize", use_container_width=True):
+                generate_summary()
+        
+        with col2:
+            if st.button("💡 Insights", use_container_width=True):
+                generate_insights()
+        
+        with col3:
+            if st.button("❓ Examples", use_container_width=True):
+                show_examples()
+        
+        with col4:
+            if st.button("📊 Stats", use_container_width=True):
+                show_stats()
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Chat History
+    if st.session_state.show_welcome or not st.session_state.chat_history:
+        render_welcome()
+    else:
+        for msg in st.session_state.chat_history:
+            avatar = "👤" if msg["role"] == "user" else "🤖"
+            
+            with st.chat_message(msg["role"], avatar=avatar):
+                st.markdown(msg["content"])
+                
+                if msg.get("confidence"):
+                    render_confidence(msg["confidence"])
+                
+                if msg.get("sources"):
+                    render_sources(msg["sources"])
+    
+    # Chat Input
+    if question := st.chat_input("💬 Ask a question about your documents..."):
+        if not st.session_state.documents:
+            st.warning("⚠️ Please upload documents first!")
+        else:
+            st.session_state.show_welcome = False
+            handle_question(question)
+
+
+# ---------------------------------------------------
+# Question Handling (Streaming)
+# ---------------------------------------------------
+def handle_question(question):
+    st.session_state.chat_history.append({
+        "role": "user",
+        "content": question
+    })
+    
+    with st.chat_message("user", avatar="👤"):
+        st.markdown(question)
+    
+    with st.chat_message("assistant", avatar="🤖"):
+        message_placeholder = st.empty()
+        full_response = ""
+        
+        # Stream response
+        for chunk in st.session_state.rag_chain.stream_answer(
+            question,
+            st.session_state.chat_history[:-1]
+        ):
+            full_response += chunk
+            message_placeholder.markdown(full_response + "▌")
+        
+        message_placeholder.markdown(full_response)
+        
+        # Get sources and confidence
+        _, sources, confidence = st.session_state.rag_chain.get_answer(
+            question,
+            st.session_state.chat_history[:-1]
+        )
+        
+        render_confidence(confidence)
+        
+        if sources:
+            render_sources(sources)
+    
+    st.session_state.chat_history.append({
+        "role": "assistant",
+        "content": full_response,
+        "sources": sources,
+        "confidence": confidence
+    })
+    
+    st.session_state.total_queries += 1
+
+
+# ---------------------------------------------------
+# UI Components
+# ---------------------------------------------------
+def render_confidence(confidence):
+    if confidence >= 80:
+        badge_class = "confidence-high"
+        label = "High Confidence"
+    elif confidence >= 50:
+        badge_class = "confidence-medium"
+        label = "Medium Confidence"
+    else:
+        badge_class = "confidence-low"
+        label = "Low Confidence"
+    
+    st.markdown(f"""
+    <span class='confidence-badge {badge_class}'>
+        {label}: {confidence:.0f}%
+    </span>
+    """, unsafe_allow_html=True)
+
+
+def render_sources(sources):
+    with st.expander("📚 View Sources"):
         for i, source in enumerate(sources[:3], 1):
             source_name = source["metadata"].get("source", "Unknown")
             page = source["metadata"].get("page", "")
@@ -448,165 +715,86 @@ def render_sources(sources: list):
             page_info = f", Page {page}" if page else ""
             
             st.markdown(f"""
-<div class='source-card'>
-    <div class='source-title'>Source {i}: {source_name}{page_info}</div>
-    <div class='source-content'>{source['content'][:200]}...</div>
-    <div class='source-meta'>Relevance: {score:.0%}</div>
-</div>
-""", unsafe_allow_html=True)
+            <div class='source-card'>
+                <div class='source-title'>Source {i}: {source_name}{page_info}</div>
+                <div class='source-content'>{source['content'][:280]}...</div>
+                <div class='source-meta'>Relevance Score: {score:.0%}</div>
+            </div>
+            """, unsafe_allow_html=True)
 
-def handle_question(question: str, filter_doc: str):
-    st.session_state.chat_history.append({"role": "user", "content": question})
-    
-    with st.chat_message("user", avatar="👤"):
-        st.markdown(question)
-    
-    with st.chat_message("assistant", avatar="🧠"):
-        with st.spinner("🤔 Analyzing documents..."):
-            filter_source = None if filter_doc == "All Documents" else filter_doc
-            
-            answer, sources = st.session_state.rag_chain.get_answer(
-                question=question,
-                chat_history=st.session_state.chat_history[:-1],
-                filter_source=filter_source
-            )
-        
-        st.markdown(answer)
-        
-        if sources:
-            render_sources(sources)
+
+def generate_summary():
+    source = st.session_state.documents[0]["name"]
+    with st.spinner("📝 Generating comprehensive summary..."):
+        summary = st.session_state.rag_chain.summarize_document(source)
     
     st.session_state.chat_history.append({
         "role": "assistant",
-        "content": answer,
-        "sources": sources
+        "content": summary
     })
-    
-    st.session_state.query_count += 1
+    st.rerun()
 
-def render_welcome():
-    st.markdown("""
-<div class='header-container'>
-    <h1 class='header-title'>🧠 DocuMind AI</h1>
-    <p class='header-subtitle'>Intelligent Document Analysis & Q&A</p>
-</div>
-""", unsafe_allow_html=True)
-    
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        st.markdown("""
-<div class='card'>
-    <div class='card-title'>📤 Upload</div>
-    <p>Upload PDF, DOCX, TXT, or CSV files from the sidebar</p>
-</div>
-""", unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown("""
-<div class='card'>
-    <div class='card-title'>💬 Chat</div>
-    <p>Ask questions and get instant answers with sources</p>
-</div>
-""", unsafe_allow_html=True)
-    
-    with col3:
-        st.markdown("""
-<div class='card'>
-    <div class='card-title'>✨ Insights</div>
-    <p>Generate summaries and extract key information</p>
-</div>
-""", unsafe_allow_html=True)
 
-def render_chat(filter_doc: str):
-    st.markdown("""
-<div class='header-container'>
-    <h1 class='header-title'>🧠 DocuMind AI</h1>
-    <p class='header-subtitle'>Chat with your documents intelligently</p>
-</div>
-""", unsafe_allow_html=True)
+def generate_insights():
+    source = st.session_state.documents[0]["name"]
+    with st.spinner("💡 Extracting key insights..."):
+        insights = st.session_state.rag_chain.extract_key_insights(source)
     
-    # Quick actions
-    if st.session_state.documents_processed:
-        st.markdown("### ⚡ Quick Actions")
-        col1, col2, col3, col4 = st.columns(4)
-        
-        with col1:
-            if st.button("📋 Summarize", use_container_width=True, key="summarize"):
-                source = filter_doc if filter_doc != "All Documents" else st.session_state.documents_processed[0]["name"]
-                with st.spinner("📝 Generating summary..."):
-                    summary = st.session_state.rag_chain.summarize_document(source)
-                st.session_state.chat_history.append({
-                    "role": "assistant",
-                    "content": f"**📋 Document Summary**\n\n{summary}",
-                    "sources": []
-                })
-                st.rerun()
-        
-        with col2:
-            if st.button("💡 Key Insights", use_container_width=True, key="insights"):
-                source = filter_doc if filter_doc != "All Documents" else st.session_state.documents_processed[0]["name"]
-                with st.spinner("💡 Extracting insights..."):
-                    insights = st.session_state.rag_chain.extract_key_insights(source)
-                st.session_state.chat_history.append({
-                    "role": "assistant",
-                    "content": f"**💡 Key Insights**\n\n{insights}",
-                    "sources": []
-                })
-                st.rerun()
-        
-        with col3:
-            if st.button("❓ Sample Q", use_container_width=True, key="samples"):
-                samples = """**Suggested Questions:**
-• What is the main topic of this document?
+    st.session_state.chat_history.append({
+        "role": "assistant",
+        "content": insights
+    })
+    st.rerun()
+
+
+def show_examples():
+    examples = """### 💭 Example Questions
+
+• What is the main topic or theme of this document?
 • What are the key findings or conclusions?
-• Are there any important dates or deadlines mentioned?
-• What recommendations are made?
-• What data or statistics are highlighted?"""
-                st.session_state.chat_history.append({
-                    "role": "assistant",
-                    "content": samples,
-                    "sources": []
-                })
-                st.rerun()
-        
-        with col4:
-            if st.button("🗑️ Clear Chat", use_container_width=True, key="clear"):
-                st.session_state.chat_history = []
-                st.rerun()
-        
-        st.markdown("---")
+• Are there any important dates, deadlines, or milestones?
+• What recommendations or action items are mentioned?
+• What data, statistics, or metrics are highlighted?
+• Who are the main stakeholders or parties involved?
+• What are the potential risks or challenges discussed?
+• What are the next steps or future plans outlined?"""
     
-    # Chat display
-    chat_container = st.container()
-    
-    with chat_container:
-        if not st.session_state.chat_history:
-            render_welcome()
-        else:
-            for message in st.session_state.chat_history:
-                avatar = "👤" if message["role"] == "user" else "🧠"
-                with st.chat_message(message["role"], avatar=avatar):
-                    st.markdown(message["content"])
-                    
-                    if message["role"] == "assistant" and "sources" in message and message["sources"]:
-                        render_sources(message["sources"])
-    
-    # Chat input
-    st.markdown("---")
-    
-    if question := st.chat_input(
-        "💬 Ask anything about your documents...",
-        disabled=not st.session_state.documents_processed
-    ):
-        handle_question(question, filter_doc)
+    st.session_state.chat_history.append({
+        "role": "assistant",
+        "content": examples
+    })
+    st.rerun()
 
-def main():
-    init_session_state()
-    initialize_components()
+
+def show_stats():
+    total_chunks = sum(d['chunks'] for d in st.session_state.documents)
+    avg_chunks = total_chunks // len(st.session_state.documents) if st.session_state.documents else 0
     
-    filter_doc = render_sidebar()
-    render_chat(filter_doc)
+    stats = f"""### 📊 Usage Statistics
+
+**Total Documents:** {len(st.session_state.documents)}  
+**Total Chunks:** {total_chunks}  
+**Total Queries:** {st.session_state.total_queries}  
+**Average Chunks per Document:** {avg_chunks}
+
+Your documents have been processed and are ready for intelligent queries!"""
+    
+    st.session_state.chat_history.append({
+        "role": "assistant",
+        "content": stats
+    })
+    st.rerun()
+
+
+# ---------------------------------------------------
+# Main
+# ---------------------------------------------------
+def main():
+    init_session()
+    initialize()
+    render_sidebar()
+    render_chat()
+
 
 if __name__ == "__main__":
     main()
