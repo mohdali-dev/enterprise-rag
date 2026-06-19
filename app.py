@@ -1,3 +1,9 @@
+import os
+from dotenv import load_dotenv
+
+# Load .env FIRST
+load_dotenv()
+
 import streamlit as st
 from dotenv import load_dotenv
 from datetime import datetime

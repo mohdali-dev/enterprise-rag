@@ -1,12 +1,12 @@
 import chromadb
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from typing import List, Dict
 import uuid
 
 
 class VectorStore:
     def __init__(self):
-        self.client = chromadb.Client()
+        self.client = chromadb.PersistentClient(path="./chroma_db")
         self.embeddings = HuggingFaceEmbeddings(
             model_name="all-MiniLM-L6-v2"
         )
