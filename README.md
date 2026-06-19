@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://your-app-url.streamlit.app)
 
-**DocuMind AI** is an enterprise-grade document intelligence platform that leverages Retrieval-Augmented Generation (RAG) to transform static documents into an interactive, conversational AI interface. It enables users to query, summarize, and extract  insights from complex document collections with high accuracy and traceable citations.
+**DocuMind AI** is an enterprise-grade document intelligence platform that leverages Retrieval-Augmented Generation (RAG) to transform static documents into an interactive, conversational AI interface. It enables users to query, summarize, and extract  insights from  document collections with high accuracy and traceable citations.
 
 ---
 
