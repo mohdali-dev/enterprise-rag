@@ -1,10 +1,15 @@
 groq
 langchain
 langchain-groq
+langchain-community
+langchain-core
 sentence-transformers
 chromadb
 streamlit
 PyMuPDF
 pdfplumber
 python-docx
+pandas
+plotly
 python-dotenv
+tiktoken
