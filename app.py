@@ -1,6 +1,5 @@
 import streamlit as st
 from dotenv import load_dotenv
-import os
 from datetime import datetime
 import time
 
@@ -10,287 +9,492 @@ from src.rag_chain import RAGChain
 
 load_dotenv()
 
-# Page config
+# ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="DocuMind AI",
     page_icon="🧠",
     layout="wide",
     initial_sidebar_state="expanded",
-    menu_items={"About": "DocuMind AI - Intelligent Document Analysis"}
+    menu_items={"About": "DocuMind AI — Intelligent Document Analysis"},
 )
 
-# Custom CSS
+# ── Styles ────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-    /* Main theme colors */
-    :root {
-        --primary: #667eea;
-        --secondary: #764ba2;
-        --success: #10b981;
-        --danger: #ef4444;
-        --warning: #f59e0b;
-    }
-    
-    /* Dark mode support */
-    @media (prefers-color-scheme: dark) {
-        :root {
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --text-primary: #f1f5f9;
-            --text-secondary: #cbd5e1;
-        }
-    }
-    
-    @media (prefers-color-scheme: light) {
-        :root {
-            --bg-primary: #ffffff;
-            --bg-secondary: #f8fafc;
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
-        }
-    }
-    
-    /* Main container */
-    .main {
-        padding-top: 2rem;
-    }
-    
-    /* Header styling */
-    .header-container {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 3rem 2rem;
-        border-radius: 15px;
-        margin-bottom: 2rem;
-        color: white;
-        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
-    }
-    
-    .header-title {
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin: 0;
-        margin-bottom: 0.5rem;
-    }
-    
-    .header-subtitle {
-        font-size: 1.1rem;
-        opacity: 0.9;
-        margin: 0;
-    }
-    
-    /* Card styling */
-    .card {
-        background: var(--bg-secondary);
-        padding: 1.5rem;
-        border-radius: 12px;
-        border: 1px solid rgba(102, 126, 234, 0.1);
-        margin-bottom: 1rem;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        transition: all 0.3s ease;
-    }
-    
-    .card:hover {
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
-        transform: translateY(-2px);
-    }
-    
-    .card-title {
-        font-size: 1.2rem;
-        font-weight: 600;
-        margin-bottom: 0.75rem;
-        color: #667eea;
-    }
-    
-    /* Document list */
-    .doc-item {
-        background: var(--bg-primary);
-        padding: 1rem;
-        border-radius: 8px;
-        margin-bottom: 0.75rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-left: 4px solid #667eea;
-    }
-    
-    .doc-name {
-        font-weight: 500;
-        color: var(--text-primary);
-    }
-    
-    .doc-info {
-        font-size: 0.85rem;
-        color: var(--text-secondary);
-    }
-    
-    /* Button styling */
-    .stButton > button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border: none;
-        border-radius: 8px;
-        padding: 0.75rem 1.5rem;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-    }
-    
-    .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-    }
-    
-    /* Input styling */
-    .stTextInput > div > div > input,
-    .stTextArea > div > div > textarea {
-        border-radius: 8px;
-        border: 1px solid rgba(102, 126, 234, 0.2);
-    }
-    
-    /* Chat messages */
-    .stChatMessage {
-        background: var(--bg-secondary);
-        border-radius: 12px;
-        padding: 1rem;
-    }
-    
-    .stChatMessage[data-testid="ChatMessage"]:has(p:first-child:contains("user")) {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-    }
-    
-    /* Metrics */
-    .metric-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 1.5rem;
-        border-radius: 12px;
-        text-align: center;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
-    }
-    
-    .metric-value {
-        font-size: 2rem;
-        font-weight: 700;
-        margin: 0.5rem 0;
-    }
-    
-    .metric-label {
-        font-size: 0.9rem;
-        opacity: 0.9;
-    }
-    
-    /* Sidebar */
-    .sidebar .sidebar-content {
-        background: var(--bg-secondary);
-    }
-    
-    /* Tabs */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 2rem;
-    }
-    
-    .stTabs [data-baseweb="tab"] {
-        height: auto;
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px 8px 0 0;
-    }
-    
-    /* Success messages */
-    .stSuccess {
-        background: rgba(16, 185, 129, 0.1);
-        border-left: 4px solid #10b981;
-        border-radius: 8px;
-    }
-    
-    /* Expander */
-    .streamlit-expanderHeader {
-        background: rgba(102, 126, 234, 0.05);
-        border-radius: 8px;
-    }
-    
-    /* Source cards */
-    .source-card {
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%);
-        border-left: 4px solid #667eea;
-        padding: 1rem;
-        margin: 0.75rem 0;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-    }
-    
-    .source-card:hover {
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
-    }
-    
-    .source-title {
-        font-weight: 600;
-        color: #667eea;
-        margin-bottom: 0.5rem;
-    }
-    
-    .source-content {
-        font-size: 0.9rem;
-        color: var(--text-secondary);
-        line-height: 1.5;
-    }
-    
-    .source-meta {
-        font-size: 0.8rem;
-        color: var(--text-secondary);
-        margin-top: 0.5rem;
-        padding-top: 0.5rem;
-        border-top: 1px solid rgba(102, 126, 234, 0.1);
-    }
-    
-    /* Quick action buttons */
-    .quick-action-btn {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        font-weight: 600;
-    }
-    
-    .quick-action-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
-    }
-    
-    /* Loading animation */
-    @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.5; }
-    }
-    
-    .loading {
-        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
-    
-    /* Scrollbar */
-    ::-webkit-scrollbar {
-        width: 8px;
-    }
-    
-    ::-webkit-scrollbar-track {
-        background: transparent;
-    }
-    
-    ::-webkit-scrollbar-thumb {
-        background: #667eea;
-        border-radius: 4px;
-    }
-    
-    ::-webkit-scrollbar-thumb:hover {
-        background: #764ba2;
-    }
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ── Hide Streamlit chrome ── */
+#MainMenu, header, footer { visibility: hidden; }
+[data-testid="stDecoration"] { display: none; }
+.stDeployButton { display: none; }
+
+/* ── Tokens ── */
+:root {
+    --ink:        #0F0F1A;
+    --amber:      #E8A030;
+    --amber-soft: rgba(232,160,48,0.10);
+    --amber-ring: rgba(232,160,48,0.18);
+    --paper:      #FAFAF8;
+    --white:      #FFFFFF;
+    --muted:      #6B7280;
+    --border:     rgba(0,0,0,0.07);
+    --sb-bg:      #0F0F1A;
+    --sb-border:  rgba(255,255,255,0.07);
+    --sb-text:    rgba(255,255,255,0.75);
+    --sb-muted:   rgba(255,255,255,0.30);
+    --sb-hover:   rgba(232,160,48,0.09);
+}
+
+/* ── Base ── */
+html, body, [class*="css"] {
+    font-family: 'Inter', sans-serif !important;
+}
+.main {
+    background: var(--paper) !important;
+    padding-top: 0 !important;
+}
+.block-container {
+    padding-top: 1.75rem !important;
+    padding-bottom: 2rem !important;
+    max-width: 100% !important;
+}
+
+/* ── Sidebar shell ── */
+section[data-testid="stSidebar"] {
+    background: var(--sb-bg) !important;
+    border-right: 1px solid var(--sb-border) !important;
+}
+section[data-testid="stSidebar"] > div {
+    padding-top: 1.25rem !important;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+    background: rgba(232,160,48,0.25);
+    border-radius: 2px;
+}
+
+/* ── Sidebar brand ── */
+.sb-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 0 1rem;
+    border-bottom: 1px solid var(--sb-border);
+    margin-bottom: 0.25rem;
+}
+.sb-brand .mark {
+    width: 36px; height: 36px;
+    border-radius: 9px;
+    background: var(--amber);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+.sb-brand .nm {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.05rem;
+    color: #F5F0E8;
+    margin: 0; line-height: 1.1;
+}
+.sb-brand .tg {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--sb-muted);
+    letter-spacing: 0.05em;
+    margin: 0;
+}
+
+/* ── Sidebar label ── */
+.sb-lbl {
+    font-size: 0.61rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sb-muted);
+    margin: 0.85rem 0 0.4rem;
+    display: block;
+}
+/* Force dark upload zone */
+[data-testid="stFileUploader"] * {
+    background-color: transparent !important;
+}
+/* ── File uploader override ── */
+section[data-testid="stSidebar"] [data-testid="stFileUploader"] {
+    background: transparent !important;
+}
+section[data-testid="stSidebar"] [data-testid="stFileUploader"] > div {
+    border: 1px dashed rgba(255,255,255,0.13) !important;
+    border-radius: 8px !important;
+    background: rgba(255,255,255,0.03) !important;
+    padding: 0.75rem !important;
+}
+section[data-testid="stSidebar"] [data-testid="stFileUploader"] span,
+section[data-testid="stSidebar"] [data-testid="stFileUploader"] p,
+section[data-testid="stSidebar"] [data-testid="stFileUploader"] small {
+    color: var(--sb-muted) !important;
+    font-size: 0.75rem !important;
+}
+section[data-testid="stSidebar"] [data-testid="stFileUploader"] button {
+    background: rgba(255,255,255,0.06) !important;
+    border: 0.5px solid rgba(255,255,255,0.12) !important;
+    color: var(--sb-text) !important;
+    border-radius: 6px !important;
+    font-size: 0.75rem !important;
+}
+section[data-testid="stSidebar"] [data-testid="stFileUploader"],
+section[data-testid="stSidebar"] [data-testid="stFileUploader"] > div,
+section[data-testid="stSidebar"] [data-testid="stFileUploader"] > div > div,
+section[data-testid="stSidebar"] [data-testid="stFileUploader"] > div > div > div,
+section[data-testid="stSidebar"] [data-testeid="stFileUploader"] section {
+    background: rgba(255,255,255,0.03) !important;
+    border: 1px dashed rgba(255,255,255,0.12) !important;
+    border-radius: 8px !important;
+    color: var(--sb-muted) !important;
+}
+/* ── Doc item ── */
+.doc-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    padding: 7px 9px;
+    border-radius: 7px;
+    border: 0.5px solid var(--sb-border);
+    margin-bottom: 4px;
+    transition: background 0.15s, border-color 0.15s;
+}
+.doc-item:hover {
+    background: var(--sb-hover);
+    border-color: rgba(232,160,48,0.22);
+}
+.doc-item .di-icon {
+    font-size: 0.88rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+.doc-item .di-name {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--sb-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 132px;
+    display: block;
+}
+.doc-item .di-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.63rem;
+    color: var(--sb-muted);
+    display: block;
+}
+
+/* ── Stats pills ── */
+.sb-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+    margin-top: 0.6rem;
+}
+.ss {
+    background: rgba(255,255,255,0.04);
+    border: 0.5px solid var(--sb-border);
+    border-radius: 7px;
+    padding: 7px 9px;
+    text-align: center;
+}
+.ss .sv {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+    color: #F5F0E8;
+    line-height: 1;
+}
+.ss .sl {
+    font-size: 0.62rem;
+    color: var(--sb-muted);
+    margin-top: 2px;
+}
+
+/* ── Sidebar buttons ── */
+section[data-testid="stSidebar"] .stButton > button {
+    background: rgba(255,255,255,0.05) !important;
+    color: var(--sb-text) !important;
+    border: 0.5px solid var(--sb-border) !important;
+    border-radius: 7px !important;
+    font-size: 0.76rem !important;
+    font-weight: 500 !important;
+    padding: 0.4rem 0.8rem !important;
+    box-shadow: none !important;
+    transition: all 0.15s !important;
+}
+section[data-testid="stSidebar"] .stButton > button:hover {
+    background: var(--sb-hover) !important;
+    border-color: rgba(232,160,48,0.25) !important;
+    color: var(--amber) !important;
+}
+
+/* ── Selectbox in sidebar ── */
+section[data-testid="stSidebar"] [data-testid="stSelectbox"] > div > div {
+    background: rgba(255,255,255,0.05) !important;
+    border: 0.5px solid var(--sb-border) !important;
+    border-radius: 7px !important;
+    font-size: 0.76rem !important;
+    color: var(--sb-text) !important;
+}
+
+/* ── Tech badge ── */
+.tech-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--sb-muted);
+    text-align: center;
+    letter-spacing: 0.04em;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--sb-border);
+    margin-top: 0.5rem;
+}
+
+/* ── Page header ── */
+.page-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding-bottom: 0.85rem;
+    margin-bottom: 0.9rem;
+    border-bottom: 1px solid var(--border);
+}
+.page-header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.75rem;
+    font-weight: 400;
+    color: var(--ink);
+    margin: 0;
+    letter-spacing: -0.4px;
+}
+.page-header h1 em {
+    color: var(--amber);
+    font-style: normal;
+}
+.ph-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+}
+
+/* ── Quick action bar ── */
+.qa-bar {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 0.85rem;
+    flex-wrap: wrap;
+}
+
+/* ── Main area buttons (quick actions) ── */
+.stButton > button {
+    background: var(--white) !important;
+    color: var(--muted) !important;
+    border: 0.5px solid var(--border) !important;
+    border-radius: 7px !important;
+    font-size: 0.76rem !important;
+    font-weight: 400 !important;
+    padding: 0.38rem 0.9rem !important;
+    box-shadow: none !important;
+    transition: border-color 0.15s, color 0.15s !important;
+    letter-spacing: 0.01em !important;
+}
+.stButton > button:hover {
+    border-color: var(--amber) !important;
+    color: var(--ink) !important;
+    background: #FFFCF5 !important;
+}
+
+/* ── Chat messages — hide default Streamlit avatar styling ── */
+[data-testid="stChatMessage"] {
+    background: transparent !important;
+    border: none !important;
+    padding: 0.1rem 0 !important;
+    gap: 10px !important;
+}
+
+/* ── User bubble ── */
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
+    flex-direction: row-reverse !important;
+}
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) [data-testid="stChatMessageContent"] {
+    background: var(--ink) !important;
+    color: #F5F0E8 !important;
+    border-radius: 12px 12px 3px 12px !important;
+    border: none !important;
+    padding: 0.6rem 0.95rem !important;
+    max-width: 68% !important;
+    align-self: flex-end !important;
+}
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) [data-testid="stChatMessageContent"] p {
+    color: #F5F0E8 !important;
+    font-size: 0.84rem !important;
+    line-height: 1.6 !important;
+    margin: 0 !important;
+}
+
+/* ── Assistant bubble ── */
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) [data-testid="stChatMessageContent"] {
+    background: var(--white) !important;
+    border: 0.5px solid var(--border) !important;
+    border-radius: 3px 12px 12px 12px !important;
+    padding: 0.7rem 1rem !important;
+    max-width: 82% !important;
+}
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) [data-testid="stChatMessageContent"] p,
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) [data-testid="stChatMessageContent"] li {
+    font-size: 0.84rem !important;
+    line-height: 1.68 !important;
+    color: var(--ink) !important;
+    margin-bottom: 0.25rem !important;
+}
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) [data-testid="stChatMessageContent"] strong {
+    font-weight: 500 !important;
+    color: var(--ink) !important;
+}
+
+/* ── Avatar icons ── */
+[data-testid="chatAvatarIcon-user"] {
+    background: rgba(0,0,0,0.06) !important;
+    border: 0.5px solid var(--border) !important;
+    color: var(--muted) !important;
+}
+[data-testid="chatAvatarIcon-assistant"] {
+    background: var(--amber) !important;
+    border: none !important;
+    color: var(--ink) !important;
+}
+[data-testid="chatAvatarIcon-assistant"] svg {
+    color: var(--ink) !important;
+    fill: var(--ink) !important;
+}
+
+/* ── Chat input ── */
+[data-testid="stChatInput"] {
+    border: 0.5px solid rgba(0,0,0,0.12) !important;
+    border-radius: 10px !important;
+    background: var(--white) !important;
+    box-shadow: none !important;
+}
+[data-testid="stChatInput"]:focus-within {
+    border-color: var(--amber) !important;
+    box-shadow: 0 0 0 3px var(--amber-ring) !important;
+}
+[data-testid="stChatInput"] textarea {
+    font-size: 0.83rem !important;
+    font-family: 'Inter', sans-serif !important;
+    color: var(--ink) !important;
+}
+
+/* ── Source card ── */
+.src-card {
+    background: var(--paper);
+    border: 0.5px solid var(--border);
+    border-left: 2.5px solid var(--amber);
+    border-radius: 0 8px 8px 0;
+    padding: 0.6rem 0.9rem;
+    margin: 0.4rem 0;
+}
+.src-card .sc-file {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.71rem;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.src-card .sc-body {
+    font-size: 0.79rem;
+    color: var(--muted);
+    line-height: 1.55;
+}
+.match-badge {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: #EAF3DE;
+    color: #3B6D11;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.62rem;
+    font-weight: 500;
+}
+
+/* ── Expander ── */
+[data-testid="stExpander"] {
+    border: 0.5px solid var(--border) !important;
+    border-radius: 8px !important;
+    background: var(--white) !important;
+}
+[data-testid="stExpander"] summary {
+    font-size: 0.78rem !important;
+    color: var(--muted) !important;
+    padding: 0.5rem 0.75rem !important;
+}
+[data-testid="stExpander"] summary:hover {
+    color: var(--ink) !important;
+}
+
+/* ── Progress bar ── */
+[data-testid="stProgressBar"] > div {
+    background: var(--amber) !important;
+    border-radius: 2px !important;
+}
+
+/* ── Welcome cards ── */
+.wc {
+    background: var(--white);
+    border: 0.5px solid var(--border);
+    border-radius: 10px;
+    padding: 1.1rem 1.15rem;
+    height: 100%;
+}
+.wc-icon { font-size: 1.2rem; margin-bottom: 0.35rem; }
+.wc-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 0.95rem;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 0.2rem;
+}
+.wc-body {
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.55;
+    margin: 0;
+}
+
+/* ── Divider ── */
+.sb-divider {
+    border: none;
+    border-top: 1px solid var(--sb-border);
+    margin: 0.55rem 0;
+}
+.main-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0.6rem 0 0.85rem;
+}
+
+/* ── Alerts ── */
+[data-testid="stAlert"] {
+    border-radius: 8px !important;
+    font-size: 0.8rem !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
-# Initialize session state
+
+# ── Session state ─────────────────────────────────────────────────────────────
 def init_session_state():
     defaults = {
         "chat_history": [],
@@ -299,11 +503,11 @@ def init_session_state():
         "rag_chain": None,
         "processor": None,
         "query_count": 0,
-        "theme": "light"
     }
     for key, value in defaults.items():
         if key not in st.session_state:
             st.session_state[key] = value
+
 
 def initialize_components():
     if st.session_state.vector_store is None:
@@ -311,124 +515,61 @@ def initialize_components():
         st.session_state.rag_chain = RAGChain(st.session_state.vector_store)
         st.session_state.processor = DocumentProcessor()
 
-def render_sidebar():
-    with st.sidebar:
-        # Logo/Title
-        st.markdown("""
-        <div style='text-align: center; margin-bottom: 2rem;'>
-            <h1 style='margin: 0; font-size: 2rem;'>🧠</h1>
-            <p style='margin: 0.5rem 0 0 0; font-weight: 600;'>DocuMind AI</p>
-            <p style='margin: 0; font-size: 0.85rem; opacity: 0.7;'>Document Intelligence</p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("---")
-        
-        # Upload section
-        st.markdown("### 📁 Upload Documents")
-        
-        uploaded_files = st.file_uploader(
-            "Choose files",
-            type=["pdf", "docx", "txt", "csv"],
-            accept_multiple_files=True,
-            label_visibility="collapsed"
-        )
-        
-        if uploaded_files:
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.button("🚀 Process", use_container_width=True, key="process_btn"):
-                    process_documents(uploaded_files)
-            with col2:
-                st.write("")  # Spacer
-        
-        st.markdown("---")
-        
-        # Documents list
-        if st.session_state.documents_processed:
-            st.markdown("### 📚 Loaded Documents")
-            st.markdown(f"**Total:** {len(st.session_state.documents_processed)} files")
-            
-            for i, doc in enumerate(st.session_state.documents_processed):
-                col1, col2, col3 = st.columns([2, 1, 0.5])
-                with col1:
-                    st.markdown(f"📄 **{doc['name'][:18]}...**")
-                with col2:
-                    st.caption(f"{doc['chunks']} chunks")
-                with col3:
-                    if st.button("🗑️", key=f"del_{i}", help="Delete"):
-                        delete_document(doc['name'])
-        
-        st.markdown("---")
-        
-        # Filter section
-        st.markdown("### 🔍 Filter")
-        filter_doc = st.selectbox(
-            "Document",
-            options=["All Documents"] + [d['name'] for d in st.session_state.documents_processed],
-            label_visibility="collapsed"
-        )
-        
-        st.markdown("---")
-        
-        # Actions section
-        st.markdown("### ⚙️ Settings")
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("🔄 Reset", use_container_width=True, key="reset_btn"):
-                reset_app()
-        with col2:
-            if st.button("📊 Stats", use_container_width=True, key="stats_btn"):
-                st.session_state.show_stats = True
-        
-        st.markdown("---")
-        st.caption("Made with ❤️ using Groq & LangChain")
-        
-        return filter_doc
 
+# ── Helpers ───────────────────────────────────────────────────────────────────
+def _ext_icon(filename: str) -> str:
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+    return {"pdf": "📄", "docx": "📝", "txt": "📃", "csv": "📊"}.get(ext, "📁")
+
+
+def _total_chunks() -> int:
+    return sum(d["chunks"] for d in st.session_state.documents_processed)
+
+
+def _active_source(filter_doc: str) -> str:
+    if filter_doc != "All documents" and filter_doc:
+        return filter_doc
+    return st.session_state.documents_processed[0]["name"]
+
+
+# ── Document ops ──────────────────────────────────────────────────────────────
 def process_documents(uploaded_files):
-    new_files = [
-        f for f in uploaded_files
-        if f.name not in [d['name'] for d in st.session_state.documents_processed]
-    ]
-    
+    existing = {d["name"] for d in st.session_state.documents_processed}
+    new_files = [f for f in uploaded_files if f.name not in existing]
+
     if not new_files:
-        st.sidebar.warning("Documents already processed!")
+        st.sidebar.warning("All selected files are already loaded.")
         return
-    
-    progress_container = st.sidebar.container()
-    progress_bar = progress_container.progress(0)
-    status = progress_container.empty()
-    
+
+    pb = st.sidebar.progress(0)
+    status = st.sidebar.empty()
+
     for i, file in enumerate(new_files):
-        status.info(f"⏳ Processing {file.name}...")
+        status.info(f"Processing {file.name}…")
         chunks = st.session_state.processor.process_file(file)
-        
-        if chunks:
-            success = st.session_state.vector_store.add_documents(chunks)
-            
-            if success:
-                st.session_state.documents_processed.append({
-                    "name": file.name,
-                    "chunks": len(chunks),
-                    "processed_at": datetime.now().strftime("%H:%M")
-                })
-        
-        progress_bar.progress((i + 1) / len(new_files))
-    
-    status.success("✅ All documents processed!")
-    time.sleep(1.5)
-    progress_container.empty()
+        if chunks and st.session_state.vector_store.add_documents(chunks):
+            st.session_state.documents_processed.append({
+                "name": file.name,
+                "chunks": len(chunks),
+                "processed_at": datetime.now().strftime("%H:%M"),
+            })
+        pb.progress((i + 1) / len(new_files))
+
+    status.success(f"✓ {len(new_files)} file(s) ready")
+    time.sleep(1.2)
+    pb.empty()
+    status.empty()
     st.rerun()
+
 
 def delete_document(doc_name: str):
     st.session_state.vector_store.delete_document(doc_name)
     st.session_state.documents_processed = [
         d for d in st.session_state.documents_processed
-        if d['name'] != doc_name
+        if d["name"] != doc_name
     ]
     st.rerun()
+
 
 def reset_app():
     if st.session_state.vector_store:
@@ -438,175 +579,271 @@ def reset_app():
     st.session_state.query_count = 0
     st.rerun()
 
+
+# ── Sidebar ───────────────────────────────────────────────────────────────────
+def render_sidebar():
+    with st.sidebar:
+        # Brand
+        st.markdown("""
+<div class="sb-brand">
+    <div class="mark">🧠</div>
+    <div>
+        <p class="nm">DocuMind</p>
+        <p class="tg">document intelligence</p>
+    </div>
+</div>""", unsafe_allow_html=True)
+
+        # Upload
+        st.markdown("<span class='sb-lbl'>Upload</span>", unsafe_allow_html=True)
+        uploaded_files = st.file_uploader(
+            "Drop files",
+            type=["pdf", "docx", "txt", "csv"],
+            accept_multiple_files=True,
+            label_visibility="collapsed",
+        )
+        if uploaded_files:
+            if st.button("Process files →", use_container_width=True, key="process_btn"):
+                process_documents(uploaded_files)
+
+        st.markdown("<hr class='sb-divider'/>", unsafe_allow_html=True)
+
+        # Loaded docs
+        if st.session_state.documents_processed:
+            st.markdown("<span class='sb-lbl'>Loaded documents</span>",
+                        unsafe_allow_html=True)
+
+            for i, doc in enumerate(st.session_state.documents_processed):
+                col_doc, col_del = st.columns([5, 1])
+                with col_doc:
+                    icon = _ext_icon(doc["name"])
+                    st.markdown(f"""
+<div class="doc-item">
+    <span class="di-icon">{icon}</span>
+    <div>
+        <span class="di-name" title="{doc['name']}">{doc['name']}</span>
+        <span class="di-meta">{doc['chunks']} chunks · {doc['processed_at']}</span>
+    </div>
+</div>""", unsafe_allow_html=True)
+                with col_del:
+                    st.markdown("<div style='margin-top:3px'>", unsafe_allow_html=True)
+                    if st.button("✕", key=f"del_{i}", help=f"Remove {doc['name']}"):
+                        delete_document(doc["name"])
+                    st.markdown("</div>", unsafe_allow_html=True)
+
+            # Stats
+            st.markdown(f"""
+<div class="sb-stats">
+    <div class="ss">
+        <div class="sv">{len(st.session_state.documents_processed)}</div>
+        <div class="sl">documents</div>
+    </div>
+    <div class="ss">
+        <div class="sv">{_total_chunks()}</div>
+        <div class="sl">chunks</div>
+    </div>
+</div>""", unsafe_allow_html=True)
+
+            st.markdown("<hr class='sb-divider'/>", unsafe_allow_html=True)
+
+        # Scope filter
+        st.markdown("<span class='sb-lbl'>Search scope</span>",
+                    unsafe_allow_html=True)
+        filter_doc = st.selectbox(
+            "Scope",
+            options=["All documents"] + [d["name"] for d in
+                                         st.session_state.documents_processed],
+            label_visibility="collapsed",
+        )
+
+        st.markdown("<hr class='sb-divider'/>", unsafe_allow_html=True)
+
+        # Bottom row
+        c1, c2 = st.columns(2)
+        with c1:
+            if st.button("Reset all", use_container_width=True, key="reset_btn"):
+                reset_app()
+        with c2:
+            st.markdown(
+                f"<p style='font-family:JetBrains Mono,monospace;font-size:0.63rem;"
+                f"color:rgba(255,255,255,0.28);text-align:right;margin-top:0.45rem'>"
+                f"{st.session_state.query_count} queries</p>",
+                unsafe_allow_html=True,
+            )
+
+        st.markdown(
+            "<p class='tech-badge'>Groq · LangChain · FAISS</p>",
+            unsafe_allow_html=True,
+        )
+
+    return filter_doc
+
+
+# ── Source rendering ──────────────────────────────────────────────────────────
 def render_sources(sources: list):
-    with st.expander("📚 Sources & References"):
-        for i, source in enumerate(sources[:3], 1):
-            source_name = source["metadata"].get("source", "Unknown")
+    if not sources:
+        return
+    with st.expander("📖 View sources"):
+        for source in sources[:3]:
+            name = source["metadata"].get("source", "Unknown")
             page = source["metadata"].get("page", "")
             score = source.get("score", 0)
-            
-            page_info = f", Page {page}" if page else ""
-            
+            page_str = f" · p. {page}" if page else ""
+            badge = f'<span class="match-badge">{score:.0%} match</span>'
+            snippet = source["content"][:240].strip()
             st.markdown(f"""
-<div class='source-card'>
-    <div class='source-title'>Source {i}: {source_name}{page_info}</div>
-    <div class='source-content'>{source['content'][:200]}...</div>
-    <div class='source-meta'>Relevance: {score:.0%}</div>
-</div>
-""", unsafe_allow_html=True)
+<div class="src-card">
+    <div class="sc-file">{name}{page_str}{badge}</div>
+    <div class="sc-body">{snippet}…</div>
+</div>""", unsafe_allow_html=True)
 
+
+# ── Welcome screen ────────────────────────────────────────────────────────────
+def render_welcome():
+    col1, col2, col3 = st.columns(3)
+    cards = [
+        ("📤", "Upload",   "Drop any PDF, DOCX, TXT, or CSV into the sidebar and hit Process."),
+        ("💬", "Ask",      "Type any question and get precise answers sourced from your documents."),
+        ("✦",  "Insights", "Summarize documents or pull out key findings in one click."),
+    ]
+    for col, (icon, title, body) in zip([col1, col2, col3], cards):
+        with col:
+            st.markdown(f"""
+<div class="wc">
+    <div class="wc-icon">{icon}</div>
+    <div class="wc-title">{title}</div>
+    <p class="wc-body">{body}</p>
+</div>""", unsafe_allow_html=True)
+
+
+# ── Chat handler ──────────────────────────────────────────────────────────────
 def handle_question(question: str, filter_doc: str):
     st.session_state.chat_history.append({"role": "user", "content": question})
-    
+
     with st.chat_message("user", avatar="👤"):
         st.markdown(question)
-    
+
     with st.chat_message("assistant", avatar="🧠"):
-        with st.spinner("🤔 Analyzing documents..."):
-            filter_source = None if filter_doc == "All Documents" else filter_doc
-            
+        with st.spinner("Searching…"):
+            filter_source = (
+                None if filter_doc == "All documents" else filter_doc
+            )
             answer, sources = st.session_state.rag_chain.get_answer(
                 question=question,
                 chat_history=st.session_state.chat_history[:-1],
-                filter_source=filter_source
+                filter_source=filter_source,
             )
-        
         st.markdown(answer)
-        
         if sources:
             render_sources(sources)
-    
-    st.session_state.chat_history.append({
-        "role": "assistant",
-        "content": answer,
-        "sources": sources
-    })
-    
+
+    st.session_state.chat_history.append(
+        {"role": "assistant", "content": answer, "sources": sources}
+    )
     st.session_state.query_count += 1
 
-def render_welcome():
-    st.markdown("""
-<div class='header-container'>
-    <h1 class='header-title'>🧠 DocuMind AI</h1>
-    <p class='header-subtitle'>Intelligent Document Analysis & Q&A</p>
-</div>
-""", unsafe_allow_html=True)
-    
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        st.markdown("""
-<div class='card'>
-    <div class='card-title'>📤 Upload</div>
-    <p>Upload PDF, DOCX, TXT, or CSV files from the sidebar</p>
-</div>
-""", unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown("""
-<div class='card'>
-    <div class='card-title'>💬 Chat</div>
-    <p>Ask questions and get instant answers with sources</p>
-</div>
-""", unsafe_allow_html=True)
-    
-    with col3:
-        st.markdown("""
-<div class='card'>
-    <div class='card-title'>✨ Insights</div>
-    <p>Generate summaries and extract key information</p>
-</div>
-""", unsafe_allow_html=True)
 
+# ── Main view ─────────────────────────────────────────────────────────────────
 def render_chat(filter_doc: str):
-    st.markdown("""
-<div class='header-container'>
-    <h1 class='header-title'>🧠 DocuMind AI</h1>
-    <p class='header-subtitle'>Chat with your documents intelligently</p>
-</div>
-""", unsafe_allow_html=True)
-    
-    # Quick actions
-    if st.session_state.documents_processed:
-        st.markdown("### ⚡ Quick Actions")
-        col1, col2, col3, col4 = st.columns(4)
-        
-        with col1:
-            if st.button("📋 Summarize", use_container_width=True, key="summarize"):
-                source = filter_doc if filter_doc != "All Documents" else st.session_state.documents_processed[0]["name"]
-                with st.spinner("📝 Generating summary..."):
-                    summary = st.session_state.rag_chain.summarize_document(source)
+    docs_loaded = bool(st.session_state.documents_processed)
+
+    # Header
+    if docs_loaded:
+        meta = (
+            f"· {st.session_state.query_count} "
+            f"{'query' if st.session_state.query_count == 1 else 'queries'} "
+            f"· {len(st.session_state.documents_processed)} "
+            f"{'doc' if len(st.session_state.documents_processed) == 1 else 'docs'} loaded"
+        )
+    else:
+        meta = "· upload documents to begin"
+
+    st.markdown(f"""
+<div class="page-header">
+    <h1>Ask your <em>documents</em></h1>
+    <span class="ph-meta">{meta}</span>
+</div>""", unsafe_allow_html=True)
+
+    # Quick actions — compact single row, only when docs loaded
+    if docs_loaded:
+        c1, c2, c3, c4 = st.columns([1, 1, 1.2, 1])
+
+        with c1:
+            if st.button("📋 Summarize", use_container_width=True, key="qa_sum"):
+                with st.spinner("Summarizing…"):
+                    text = st.session_state.rag_chain.summarize_document(
+                        _active_source(filter_doc)
+                    )
                 st.session_state.chat_history.append({
                     "role": "assistant",
-                    "content": f"**📋 Document Summary**\n\n{summary}",
-                    "sources": []
+                    "content": f"**Summary**\n\n{text}",
+                    "sources": [],
                 })
                 st.rerun()
-        
-        with col2:
-            if st.button("💡 Key Insights", use_container_width=True, key="insights"):
-                source = filter_doc if filter_doc != "All Documents" else st.session_state.documents_processed[0]["name"]
-                with st.spinner("💡 Extracting insights..."):
-                    insights = st.session_state.rag_chain.extract_key_insights(source)
+
+        with c2:
+            if st.button("💡 Key insights", use_container_width=True, key="qa_ins"):
+                with st.spinner("Extracting…"):
+                    text = st.session_state.rag_chain.extract_key_insights(
+                        _active_source(filter_doc)
+                    )
                 st.session_state.chat_history.append({
                     "role": "assistant",
-                    "content": f"**💡 Key Insights**\n\n{insights}",
-                    "sources": []
+                    "content": f"**Key insights**\n\n{text}",
+                    "sources": [],
                 })
                 st.rerun()
-        
-        with col3:
-            if st.button("❓ Sample Q", use_container_width=True, key="samples"):
-                samples = """**Suggested Questions:**
-• What is the main topic of this document?
-• What are the key findings or conclusions?
-• Are there any important dates or deadlines mentioned?
-• What recommendations are made?
-• What data or statistics are highlighted?"""
+
+        with c3:
+            if st.button("❓ Suggest questions", use_container_width=True, key="qa_sug"):
                 st.session_state.chat_history.append({
                     "role": "assistant",
-                    "content": samples,
-                    "sources": []
+                    "content": (
+                        "**Questions to try:**\n\n"
+                        "- What is the main topic of this document?\n"
+                        "- What are the key findings or conclusions?\n"
+                        "- Are there important dates or deadlines mentioned?\n"
+                        "- What recommendations are made?\n"
+                        "- What data or statistics are highlighted?"
+                    ),
+                    "sources": [],
                 })
                 st.rerun()
-        
-        with col4:
-            if st.button("🗑️ Clear Chat", use_container_width=True, key="clear"):
+
+        with c4:
+            if st.button("🗑️ Clear chat", use_container_width=True, key="qa_clr"):
                 st.session_state.chat_history = []
                 st.rerun()
-        
-        st.markdown("---")
-    
-    # Chat display
-    chat_container = st.container()
-    
-    with chat_container:
-        if not st.session_state.chat_history:
-            render_welcome()
-        else:
-            for message in st.session_state.chat_history:
-                avatar = "👤" if message["role"] == "user" else "🧠"
-                with st.chat_message(message["role"], avatar=avatar):
-                    st.markdown(message["content"])
-                    
-                    if message["role"] == "assistant" and "sources" in message and message["sources"]:
-                        render_sources(message["sources"])
-    
-    # Chat input
-    st.markdown("---")
-    
-    if question := st.chat_input(
-        "💬 Ask anything about your documents...",
-        disabled=not st.session_state.documents_processed
-    ):
+
+        st.markdown("<hr class='main-divider'/>", unsafe_allow_html=True)
+
+    # Chat history or welcome
+    if not st.session_state.chat_history:
+        render_welcome()
+    else:
+        for msg in st.session_state.chat_history:
+            avatar = "👤" if msg["role"] == "user" else "🧠"
+            with st.chat_message(msg["role"], avatar=avatar):
+                st.markdown(msg["content"])
+                if msg["role"] == "assistant" and msg.get("sources"):
+                    render_sources(msg["sources"])
+
+    # Input — disabled until docs are loaded
+    placeholder = (
+        "Ask anything about your documents…"
+        if docs_loaded
+        else "Upload and process a document to start asking questions…"
+    )
+    if question := st.chat_input(placeholder, disabled=not docs_loaded):
         handle_question(question, filter_doc)
 
+
+# ── Entry ─────────────────────────────────────────────────────────────────────
 def main():
     init_session_state()
     initialize_components()
-    
     filter_doc = render_sidebar()
     render_chat(filter_doc)
+
 
 if __name__ == "__main__":
     main()
