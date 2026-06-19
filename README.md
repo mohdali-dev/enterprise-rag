@@ -10,7 +10,7 @@
 ## Core Capabilities
 
 *   **Multi-Format Ingestion:** Parses and processes PDF, DOCX, TXT, and CSV files using intelligent text chunking with boundary awareness and metadata preservation.
-*   **Context-Grounded Q&A:** Answers natural language queries using a RAG pipeline that strictly grounds responses in the provided context to mitigate hallucinations.
+*   **Context-Grounded Q&A:** Answers natural language queries using a RAG pipelstrictly grounds responses in the provided context to mitigate hallucinations.
 *   **Traceable Citations:** Provides precise source tracking, including document names and page numbers, for every generated response.
 *   **Automated Summarization:** Generates executive summaries and extracts key insights from  document corpora.
 *   **Privacy-First Design:** Employs local vector storage (ChromaDB) and local embedding models to ensure sensitive document data remains on-premises.
