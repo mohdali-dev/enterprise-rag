@@ -7,9 +7,9 @@ sentence-transformers
 chromadb
 streamlit
 PyMuPDF
-pdfplumber
 python-docx
 pandas
+tabulate
 plotly
 python-dotenv
 tiktoken
